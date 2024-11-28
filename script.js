@@ -60,6 +60,7 @@ function displayTracks(tracks) {
   const footer = document.querySelector("footer");
 
   logo.classList.add("hidden"); 
+  logo.style.display = "none";
   footer.classList.add("hidden");
 
   tracksList.innerHTML = ""; 
