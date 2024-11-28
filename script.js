@@ -56,6 +56,11 @@ document.getElementById("get-tracks").addEventListener("click", async () => {
 function displayTracks(tracks) {
   const tracksContainer = document.getElementById("tracks-container");
   const tracksList = document.getElementById("tracks-list");
+  const logo = document.getElementById("logo");
+  const footer = document.querySelector("footer");
+
+  logo.classList.add("hidden"); 
+  footer.classList.add("hidden");
 
   tracksList.innerHTML = ""; 
 
