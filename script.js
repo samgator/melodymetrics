@@ -67,7 +67,9 @@ function displayTracks(tracks) {
 
   tracks.forEach((track) => {
     const listItem = document.createElement("li");
-    listItem.textContent = `${track.name} by ${track.artists.map((artist) => artist.name).join(", ")}`;
+
+    listItem.innerHTML = `${track.name} by 
+      ${track.artists.map((artist) => `<strong>${artist.name}</strong>`).join(", ")}`;
     tracksList.appendChild(listItem);
   });
 
