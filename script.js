@@ -53,7 +53,7 @@ document.getElementById("get-tracks").addEventListener("click", async () => {
 });
 
 // Function to display the user's top tracks
-function displayTracks(tracks) {
+async function displayTracks(tracks) {
   const tracksContainer = document.getElementById("tracks-container");
   const tracksList = document.getElementById("tracks-list");
   const logo = document.getElementById("logo");
@@ -63,15 +63,29 @@ function displayTracks(tracks) {
   logo.style.display = "none";
   footer.classList.add("hidden");
 
-  tracksList.innerHTML = ""; 
+  tracksList.innerHTML = "";
 
-  tracks.forEach((track) => {
+  for (const track of tracks) {
     const listItem = document.createElement("li");
 
-    listItem.innerHTML = `${track.name} by 
-      ${track.artists.map((artist) => `<strong>${artist.name}</strong>`).join(", ")}`;
+    const artistResponse = await fetch(`https://api.spotify.com/v1/artists/${track.artists[0].id}`, {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    });
+
+    let genres = [];
+    if (artistResponse.ok) {
+      const artistData = await artistResponse.json();
+      genres = artistData.genres;
+    }
+
+    listItem.innerHTML = `
+      ${track.name} by 
+      ${track.artists.map((artist) => `<strong>${artist.name}</strong>`).join(", ")}
+      <br><em>Genres: ${genres.join(", ")}</em>`;
     tracksList.appendChild(listItem);
-  });
+  }
 
   tracksContainer.classList.remove("hidden");
 }
