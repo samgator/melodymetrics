@@ -55,6 +55,8 @@ document.getElementById("get-tracks").addEventListener("click", async () => {
 function displayTracks(tracks) {
   const tracksContainer = document.getElementById("tracks-container");
   const tracksList = document.getElementById("tracks-list");
+  const logo = document.getElementById("logo");
+
   tracksList.innerHTML = "";
 
   tracks.forEach((track) => {
@@ -66,4 +68,5 @@ function displayTracks(tracks) {
   });
 
   tracksContainer.classList.remove("hidden");
+  logo.classList.add("hidden");
 }
