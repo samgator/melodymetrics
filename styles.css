@@ -128,3 +128,22 @@ h1 {
   font-size: 3rem;
 }
 
+#notes-left, #notes-right {
+  position: absolute; 
+  width: 20%;
+  height: auto;
+  display: none; 
+  z-index: 1; 
+}
+
+#notes-left {
+  top: 50%; 
+  left: 7%; 
+  transform: translateY(-50%);
+}
+
+#notes-right {
+  top: 50%; 
+  right: 7%; 
+  transform: translateY(-50%);
+}
