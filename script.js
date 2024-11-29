@@ -75,10 +75,17 @@ document.getElementById("get-tracks").addEventListener("click", async () => {
     alert("Error fetching top tracks");
   }
   hideSpinner();
+
+  //change back button back 
+  const button = document.getElementById('get-tracks');
+  button.textContent = 'Show Recommendations With Max Heap';
 });
 
 // Event Listener for recommendations
 document.getElementById('max-heap-recommend-button').addEventListener('click', async () => {
+  // BACK BUTTON
+  const button = document.getElementById('get-tracks');
+  button.textContent = 'Back';
   const token = accessToken;
   const tracks = await getTopTracks(token);
 
