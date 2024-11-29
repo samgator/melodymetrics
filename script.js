@@ -2,6 +2,9 @@ const clientId = "d69264f6364a472fa139415e9f7593e1";
 const redirectUri = "http://localhost:5500"; 
 const scopes = ["user-top-read"];
 let accessToken = null;
+let cachedTopTracks = null;
+let cachedRecommendations = null;
+
 
 // Helper for Spotify login
 document.getElementById("login-button").addEventListener("click", () => {
@@ -31,8 +34,24 @@ document.getElementById("get-tracks").addEventListener("click", async () => {
     return;
   }
 
+  const recommendationsContainer = document.getElementById('recommendations-container');
+
+  if (recommendationsContainer) {
+    recommendationsContainer.classList.add('hidden');
+  }
+
+  const topTracksContainer = document.getElementById('tracks-container');
+  topTracksContainer.classList.remove('hidden');
+
   document.getElementById("recommend-button").classList.remove("hidden");
   document.getElementById("get-tracks").classList.add("hidden");
+
+  if (cachedTopTracks) {
+    displayTopTracks(cachedTopTracks);
+    return;
+  }
+
+  showSpinner();
 
   try {
     
@@ -48,17 +67,40 @@ document.getElementById("get-tracks").addEventListener("click", async () => {
 
     const data = await response.json();
     displayTracks(data.items);
+
+    cachedTopTracks = data.items;
     
   } catch (error) {
     console.error(error);
     alert("Error fetching top tracks");
   }
+  hideSpinner();
 });
 
 // Event Listener for recommendations
 document.getElementById('recommend-button').addEventListener('click', async () => {
   const token = accessToken;
   const tracks = await getTopTracks(token);
+
+  const topTracksContainer = document.getElementById('tracks-container');
+  if (topTracksContainer) {
+    topTracksContainer.classList.add('hidden');
+  }
+
+  const recommendationsContainer = document.getElementById('recommendations-container');
+  if (recommendationsContainer) {
+    recommendationsContainer.classList.remove('hidden');
+  }
+
+  document.getElementById("recommend-button").classList.add("hidden");
+  document.getElementById("get-tracks").classList.remove("hidden");
+
+  if (cachedRecommendations) {
+    displayRecommendations(cachedRecommendations);
+    return;
+  }
+
+  showSpinner();
 
   if (!tracks || tracks.length === 0) {
     alert("No top tracks available.");
@@ -72,6 +114,7 @@ document.getElementById('recommend-button').addEventListener('click', async () =
     return;
   }
 
+
   const popularTracks = await getPopularTracks(topGenres, token);
 
   const maxHeap = new MaxHeap();
@@ -82,12 +125,16 @@ document.getElementById('recommend-button').addEventListener('click', async () =
     recommendations.push(maxHeap.extractMax());
   }
 
+  cachedRecommendations = recommendations;
   displayRecommendations(recommendations);
+  
+  hideSpinner();
 });
 
 
 // Function to display the user's top tracks
 async function displayTracks(tracks) {
+  showSpinner();
   const tracksContainer = document.getElementById("tracks-container");
   const tracksList = document.getElementById("tracks-list");
   const logo = document.getElementById("logo");
@@ -143,6 +190,7 @@ async function displayTracks(tracks) {
   const notesRight = document.getElementById("notes-right");
   notesLeft.style.display = "block";
   notesRight.style.display = "block";
+  hideSpinner();
 }
 
 
@@ -286,6 +334,7 @@ class MaxHeap {
 
 // Display Recommendations
 function displayRecommendations(tracks) {
+  
   let recommendationsContainer = document.getElementById('recommendations-container');
 
   if (!recommendationsContainer) {
@@ -310,4 +359,19 @@ function displayRecommendations(tracks) {
     listItem.textContent = `${track.name} by ${track.artists.map((artist) => artist.name).join(', ')}`;
     list.appendChild(listItem);
   });
+  
+}
+
+function showSpinner() {
+  const spinner = document.getElementById('loading-spinner');
+  if (spinner) {
+    spinner.classList.remove('hidden');
+  }
+}
+
+function hideSpinner() {
+  const spinner = document.getElementById('loading-spinner');
+  if (spinner) {
+    spinner.classList.add('hidden');
+  }
 }
