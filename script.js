@@ -59,7 +59,7 @@ async function displayTracks(tracks) {
   const logo = document.getElementById("logo");
   const footer = document.querySelector("footer");
 
-  logo.classList.add("hidden"); 
+  logo.classList.add("hidden");
   logo.style.display = "none";
   footer.classList.add("hidden");
 
@@ -88,6 +88,11 @@ async function displayTracks(tracks) {
   }
 
   tracksContainer.classList.remove("hidden");
+
+  const notesLeft = document.getElementById("notes-left");
+  const notesRight = document.getElementById("notes-right");
+  notesLeft.style.display = "block";
+  notesRight.style.display = "block";
 }
 
 // Function to process genres
