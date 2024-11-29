@@ -174,7 +174,7 @@ async function displayTracks(tracks) {
       listItem.style.color = "silver";
     }
     else if(index === 2){
-      listItem.style.color = "bronze";
+      listItem.style.color = "#cd7f32";
     }
     else{
       listItem.style.color = "white";
@@ -334,13 +334,22 @@ class MaxHeap {
 
 // Display Recommendations
 function displayRecommendations(tracks) {
-  
   let recommendationsContainer = document.getElementById('recommendations-container');
 
   if (!recommendationsContainer) {
     recommendationsContainer = document.createElement('div');
     recommendationsContainer.id = 'recommendations-container';
     recommendationsContainer.innerHTML = '<h2>Recommended Tracks</h2><ul id="recommendations-list"></ul>';
+    
+    recommendationsContainer.style.border = "1px solid #444";
+    recommendationsContainer.style.borderRadius = "8px";
+    recommendationsContainer.style.padding = "20px";
+    recommendationsContainer.style.backgroundColor = "#222";
+    recommendationsContainer.style.color = "#fff";
+    recommendationsContainer.style.maxWidth = "600px";
+    recommendationsContainer.style.margin = "20px auto";
+    recommendationsContainer.style.outline = "none";
+
     document.body.appendChild(recommendationsContainer);
   }
 
@@ -350,6 +359,8 @@ function displayRecommendations(tracks) {
   if (tracks.length === 0) {
     const listItem = document.createElement('li');
     listItem.textContent = "No recommendations available.";
+    listItem.style.color = "#bbb";
+    listItem.style.textAlign = "center";
     list.appendChild(listItem);
     return;
   }
@@ -357,9 +368,23 @@ function displayRecommendations(tracks) {
   tracks.forEach((track) => {
     const listItem = document.createElement('li');
     listItem.textContent = `${track.name} by ${track.artists.map((artist) => artist.name).join(', ')}`;
+    
+    listItem.style.border = "1px solid #555";
+    listItem.style.borderRadius = "5px";
+    listItem.style.padding = "10px";
+    listItem.style.margin = "5px 0";
+    listItem.style.backgroundColor = "#333";
+    listItem.style.color = "#fff";
+    listItem.style.fontFamily = "Arial, sans-serif";
+    listItem.style.fontSize = "14px";
+    listItem.style.outline = "none";
+
     list.appendChild(listItem);
   });
-  
+
+  list.style.listStyle = "none";
+  list.style.padding = "0";
+  list.style.margin = "0";
 }
 
 function showSpinner() {
