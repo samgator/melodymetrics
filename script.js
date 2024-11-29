@@ -1,4 +1,4 @@
-const clientId = "d69264f6364a472fa139415e9f7593e1"; 
+const clientId = "70e55b3d35cf454f9fce7c88ee08a170"; 
 const redirectUri = "http://localhost:5500"; 
 const scopes = ["user-top-read"];
 let accessToken = null;
@@ -47,7 +47,7 @@ document.getElementById("get-tracks").addEventListener("click", async () => {
   document.getElementById("get-tracks").classList.add("hidden");
 
   if (cachedTopTracks) {
-    displayTopTracks(cachedTopTracks);
+    displayTracks(cachedTopTracks);
     return;
   }
 
@@ -82,19 +82,6 @@ document.getElementById('max-heap-recommend-button').addEventListener('click', a
   const token = accessToken;
   const tracks = await getTopTracks(token);
 
-  const topTracksContainer = document.getElementById('tracks-container');
-  if (topTracksContainer) {
-    topTracksContainer.classList.add('hidden');
-  }
-
-  const recommendationsContainer = document.getElementById('recommendations-container');
-  if (recommendationsContainer) {
-    recommendationsContainer.classList.remove('hidden');
-  }
-
-  document.getElementById("max-heap-recommend-button").classList.add("hidden");
-  document.getElementById("get-tracks").classList.remove("hidden");
-
   if (cachedRecommendations) {
     displayRecommendations(cachedRecommendations);
     return;
@@ -111,8 +98,22 @@ document.getElementById('max-heap-recommend-button').addEventListener('click', a
 
   if (topGenres.length === 0) {
     alert("No genres found for your top tracks.");
+    hideSpinner();
     return;
   }
+
+  const topTracksContainer = document.getElementById('tracks-container');
+  if (topTracksContainer) {
+    topTracksContainer.classList.add('hidden');
+  }
+
+  const recommendationsContainer = document.getElementById('recommendations-container');
+  if (recommendationsContainer) {
+    recommendationsContainer.classList.remove('hidden');
+  }
+
+  document.getElementById("max-heap-recommend-button").classList.add("hidden");
+  document.getElementById("get-tracks").classList.remove("hidden");
 
 
   const popularTracks = await getPopularTracks(topGenres, token);
@@ -232,6 +233,7 @@ async function fetchGenres(artistIds, accessToken) {
         }
       } else {
         console.error(`Error fetching genres for artist ${artistId}: ${response.statusText}`);
+        console.log();
       }
     }
   } catch (error) {
