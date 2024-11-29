@@ -182,3 +182,14 @@ li:nth-child(3) {
 .hidden {
   display: none;
 }
+
+#recommendations-container {
+  background: #333; 
+}
+
+#recommendations-list li {
+  margin: 10px 0;
+  padding: 10px;
+  background: #282828; 
+  border-radius: 5px;
+}
