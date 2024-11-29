@@ -24,7 +24,7 @@ window.onload = () => {
 };
 }
 
-// Get user's top tracks
+// Event listener for top tracks button
 document.getElementById("get-tracks").addEventListener("click", async () => {
   if (!accessToken) {
     alert("You need to log in first.");
@@ -32,6 +32,7 @@ document.getElementById("get-tracks").addEventListener("click", async () => {
   }
 
   document.getElementById("recommend-button").classList.remove("hidden");
+  document.getElementById("get-tracks").classList.add("hidden");
 
   try {
     
@@ -53,6 +54,37 @@ document.getElementById("get-tracks").addEventListener("click", async () => {
     alert("Error fetching top tracks");
   }
 });
+
+// Event Listener for recommendations
+document.getElementById('recommend-button').addEventListener('click', async () => {
+  const token = accessToken;
+  const tracks = await getTopTracks(token);
+
+  if (!tracks || tracks.length === 0) {
+    alert("No top tracks available.");
+    return;
+  }
+
+  const topGenres = await getTopGenres(tracks, token);
+
+  if (topGenres.length === 0) {
+    alert("No genres found for your top tracks.");
+    return;
+  }
+
+  const popularTracks = await getPopularTracks(topGenres, token);
+
+  const maxHeap = new MaxHeap();
+  popularTracks.forEach((track) => maxHeap.insert(track));
+
+  const recommendations = [];
+  while (maxHeap.heap.length > 0) {
+    recommendations.push(maxHeap.extractMax());
+  }
+
+  displayRecommendations(recommendations);
+});
+
 
 // Function to display the user's top tracks
 async function displayTracks(tracks) {
@@ -115,24 +147,59 @@ async function displayTracks(tracks) {
 
 
 async function getTopTracks(accessToken) {
-  const response = await fetch('https://api.spotify.com/v1/me/top/tracks', {
-    headers: {
-      Authorization: `Bearer ${accessToken}`,
-    },
-  });
-  const data = await response.json();
-  return data.items;
+  try {
+    const response = await fetch('https://api.spotify.com/v1/me/top/tracks', {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error(`Error fetching top tracks: ${response.statusText}`);
+    }
+
+    const data = await response.json();
+    return data.items;
+  } catch (error) {
+    console.error(error);
+    return [];
+  }
+}
+
+// Function to fetch genres for a list of artist IDs
+async function fetchGenres(artistIds, accessToken) {
+  const genres = [];
+  try {
+    for (const artistId of artistIds) {
+      const response = await fetch(`https://api.spotify.com/v1/artists/${artistId}`, {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      });
+
+      if (response.ok) {
+        const artist = await response.json();
+        if (artist.genres && artist.genres.length > 0) {
+          genres.push(...artist.genres);
+        }
+      } else {
+        console.error(`Error fetching genres for artist ${artistId}: ${response.statusText}`);
+      }
+    }
+  } catch (error) {
+    console.error(error);
+  }
+  return genres;
 }
 
 // Function to get the 5 most common genres
-function getTopGenres(tracks) {
+async function getTopGenres(tracks, accessToken) {
+  const artistIds = tracks.map((track) => track.artists[0].id);
+  const genres = await fetchGenres(artistIds, accessToken);
+
   const genreCounts = {};
-  tracks.forEach((track) => {
-    if (track.album.artists[0].genres) {
-      track.album.artists[0].genres.forEach((genre) => {
-        genreCounts[genre] = (genreCounts[genre] || 0) + 1;
-      });
-    }
+  genres.forEach((genre) => {
+    genreCounts[genre] = (genreCounts[genre] || 0) + 1;
   });
 
   const sortedGenres = Object.entries(genreCounts)
@@ -219,34 +286,28 @@ class MaxHeap {
 
 // Display Recommendations
 function displayRecommendations(tracks) {
-  const recommendationsContainer = document.createElement('div');
-  recommendationsContainer.id = 'recommendations-container';
-  recommendationsContainer.innerHTML = '<h2>Recommended Tracks</h2><ul id="recommendations-list"></ul>';
-  document.body.appendChild(recommendationsContainer);
+  let recommendationsContainer = document.getElementById('recommendations-container');
+
+  if (!recommendationsContainer) {
+    recommendationsContainer = document.createElement('div');
+    recommendationsContainer.id = 'recommendations-container';
+    recommendationsContainer.innerHTML = '<h2>Recommended Tracks</h2><ul id="recommendations-list"></ul>';
+    document.body.appendChild(recommendationsContainer);
+  }
 
   const list = document.getElementById('recommendations-list');
+  list.innerHTML = "";
+
+  if (tracks.length === 0) {
+    const listItem = document.createElement('li');
+    listItem.textContent = "No recommendations available.";
+    list.appendChild(listItem);
+    return;
+  }
+
   tracks.forEach((track) => {
     const listItem = document.createElement('li');
     listItem.textContent = `${track.name} by ${track.artists.map((artist) => artist.name).join(', ')}`;
     list.appendChild(listItem);
   });
 }
-
-// Event Listener
-document.getElementById('get-tracks').addEventListener('click', async () => {
-  const tracks = await getTopTracks(accessToken);
-
-  const topGenres = getTopGenres(tracks);
-  const popularTracks = await getPopularTracks(topGenres, accessToken);
-
-  const maxHeap = new MaxHeap();
-  popularTracks.forEach((track) => maxHeap.insert(track));
-
-  const recommendations = [];
-  while (maxHeap.heap.length > 0) {
-    recommendations.push(maxHeap.extractMax());
-  }
-
-  displayRecommendations(recommendations);
-});
-
