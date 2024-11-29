@@ -147,3 +147,7 @@ h1 {
   right: 7%; 
   transform: translateY(-50%);
 }
+
+li:nth-child(3) {
+  color: #cd7f32; 
+}

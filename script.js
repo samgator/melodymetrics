@@ -67,7 +67,7 @@ async function displayTracks(tracks) {
 
   tracksList.innerHTML = "";
 
-  for (const track of tracks) {
+  for (const [index, track] of tracks.entries()) {
     const listItem = document.createElement("li");
 
     const artistResponse = await fetch(`https://api.spotify.com/v1/artists/${track.artists[0].id}`, {
@@ -86,11 +86,27 @@ async function displayTracks(tracks) {
       ${track.name} by 
       ${track.artists.map((artist) => `<strong>${artist.name}</strong>`).join(", ")}
       <br><em>Genres: ${genres.join(", ")}</em>`;
+
+    // Apply color based on rank
+    if(index === 0){
+      listItem.style.color = "gold";
+    }
+    else if(index === 1){
+      listItem.style.color = "silver";
+    }
+    else if(index === 2){
+      listItem.style.color = "bronze";
+    }
+    else{
+      listItem.style.color = "white";
+    }
+
     tracksList.appendChild(listItem);
   }
 
   tracksContainer.classList.remove("hidden");
 
+  // Show the music notes
   const notesLeft = document.getElementById("notes-left");
   const notesRight = document.getElementById("notes-right");
   notesLeft.style.display = "block";
