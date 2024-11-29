@@ -167,6 +167,9 @@ async function displayTracks(tracks) {
     if (artistResponse.ok) {
       const artistData = await artistResponse.json();
       genres = artistData.genres;
+      if (genres.length === 0) {
+        genres.push("No listed genres");
+      }
     }
 
     listItem.innerHTML = `
