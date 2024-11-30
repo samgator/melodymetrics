@@ -44,6 +44,7 @@ document.getElementById("get-tracks").addEventListener("click", async () => {
   topTracksContainer.classList.remove('hidden');
 
   document.getElementById("max-heap-recommend-button").classList.remove("hidden");
+  document.getElementById("map-recommend-button").classList.remove("hidden");
   document.getElementById("get-tracks").classList.add("hidden");
 
   if (cachedTopTracks) {
@@ -77,15 +78,14 @@ document.getElementById("get-tracks").addEventListener("click", async () => {
   hideSpinner();
 
   //change back button back 
-  const button = document.getElementById('get-tracks');
-  button.textContent = 'Show Recommendations With Max Heap';
+  const buttonName1 = document.getElementById('get-tracks');
+  buttonName1.textContent = 'Show Recommendations With Max Heap';
 });
 
 // Event Listener for recommendations
 document.getElementById('max-heap-recommend-button').addEventListener('click', async () => {
-  // BACK BUTTON
-  const button = document.getElementById('get-tracks');
-  button.textContent = 'Back';
+  document.getElementById("map-recommend-button").classList.add("hidden");
+
   const token = accessToken;
   const tracks = await getTopTracks(token);
 
@@ -137,6 +137,9 @@ document.getElementById('max-heap-recommend-button').addEventListener('click', a
   displayRecommendations(recommendations);
   
   hideSpinner();
+  // BACK BUTTON
+  const buttonName2 = document.getElementById('get-tracks');
+  buttonName2.textContent = 'Back';
 });
 
 
@@ -167,9 +170,6 @@ async function displayTracks(tracks) {
     if (artistResponse.ok) {
       const artistData = await artistResponse.json();
       genres = artistData.genres;
-      if (genres.length === 0) {
-        genres.push("No listed genres");
-      }
     }
 
     listItem.innerHTML = `
