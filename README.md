@@ -10,3 +10,6 @@ Our app for the Spotify API is currently in development mode since it was create
 
 ### Note
 Signing in to your Spotify account with Google is not supported when running our program with a Live Server. To sign in with Google, you **must** use our [link](https://melodymetrics.netlify.app/). Signing in with a regular Spotify account with the Live Server works just fine, though.
+
+## Getting Recommendations
+If your Spotify account does not have a listening history, our program will not display any results. Therefore, testing our app with a new Spotify account is not recommended.
