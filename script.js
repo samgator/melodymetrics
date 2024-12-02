@@ -3,9 +3,8 @@ let redirectUri;
 const scopes = ["user-top-read"];
 let accessToken = null;
 let cachedTopTracks = null;
-let cachedRecommendations = null;
 
-// Set redirct URI for local development or hosted site.
+// Set redirct URI for local development or hosted website
 if (window.location.hostname === 'localhost') {
   redirectUri = 'http://localhost:5500'; 
 } else if (window.location.hostname === '127.0.0.1') {
@@ -53,6 +52,7 @@ document.getElementById("get-tracks").addEventListener("click", async () => {
   topTracksContainer.classList.remove('hidden');
 
   document.getElementById("max-heap-recommend-button").classList.remove("hidden");
+  document.getElementById("map-recommend-button").classList.remove("hidden");
   document.getElementById("get-tracks").classList.add("hidden");
 
   if (cachedTopTracks) {
@@ -85,23 +85,24 @@ document.getElementById("get-tracks").addEventListener("click", async () => {
   }
   hideSpinner();
 
-  //change back button back 
-  const button = document.getElementById('get-tracks');
-  button.textContent = 'Show Recommendations With Max Heap';
 });
 
 // Event Listener for recommendations
 document.getElementById('max-heap-recommend-button').addEventListener('click', async () => {
-  // BACK BUTTON
+  // change back button back
   const button = document.getElementById('get-tracks');
   button.textContent = 'Back';
+  document.getElementById("max-heap-recommend-button").classList.add("hidden");
+  document.getElementById("map-recommend-button").classList.add("hidden");
+  document.getElementById("get-tracks").classList.remove("hidden");
+
+  const topTracksContainer = document.getElementById('tracks-container');
+  if (topTracksContainer) {
+    topTracksContainer.classList.add('hidden');
+  }
+
   const token = accessToken;
   const tracks = await getTopTracks(token);
-
-  if (cachedRecommendations) {
-    displayRecommendations(cachedRecommendations);
-    return;
-  }
 
   showSpinner();
 
@@ -118,19 +119,10 @@ document.getElementById('max-heap-recommend-button').addEventListener('click', a
     return;
   }
 
-  const topTracksContainer = document.getElementById('tracks-container');
-  if (topTracksContainer) {
-    topTracksContainer.classList.add('hidden');
-  }
-
   const recommendationsContainer = document.getElementById('recommendations-container');
   if (recommendationsContainer) {
     recommendationsContainer.classList.remove('hidden');
   }
-
-  document.getElementById("max-heap-recommend-button").classList.add("hidden");
-  document.getElementById("get-tracks").classList.remove("hidden");
-
 
   const popularTracks = await getPopularTracks(topGenres, token);
 
@@ -142,16 +134,16 @@ document.getElementById('max-heap-recommend-button').addEventListener('click', a
     recommendations.push(maxHeap.extractMax());
   }
 
-  cachedRecommendations = recommendations;
+  hideSpinner();
+
   displayRecommendations(recommendations);
   
-  hideSpinner();
+  
 });
 
 
 // Function to display the user's top tracks
 async function displayTracks(tracks) {
-  showSpinner();
   const tracksContainer = document.getElementById("tracks-container");
   const tracksList = document.getElementById("tracks-list");
   const logo = document.getElementById("logo");
@@ -176,9 +168,6 @@ async function displayTracks(tracks) {
     if (artistResponse.ok) {
       const artistData = await artistResponse.json();
       genres = artistData.genres;
-      if (genres.length === 0) {
-        genres.push("No listed genres");
-      }
     }
 
     listItem.innerHTML = `
@@ -210,7 +199,6 @@ async function displayTracks(tracks) {
   const notesRight = document.getElementById("notes-right");
   notesLeft.style.display = "block";
   notesRight.style.display = "block";
-  hideSpinner();
 }
 
 
