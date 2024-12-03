@@ -126,6 +126,12 @@ document.getElementById('max-heap-recommend-button').addEventListener('click', a
 
   const popularTracks = await getPopularTracks(topGenres, token);
 
+  // Map each track with their popularities from the Spotify API for sorting
+  const trackPopularityMap = {};
+  for (const track of popularTracks) {
+    trackPopularityMap[track.name] = track.popularTracks;
+  }
+
   hideSpinner();
 
   displayRecommendations(popularTracks);
@@ -174,6 +180,11 @@ document.getElementById('map-recommend-button').addEventListener('click', async 
   }
 
   const popularTracks = await getPopularTracks(topGenres, token);
+  // Map each track with their popularities from the Spotify API for sorting
+  const trackPopularityMap = {};
+  for (const track of popularTracks) {
+    trackPopularityMap[track.name] = track.popularTracks;
+  }
 
   hideSpinner();
 
