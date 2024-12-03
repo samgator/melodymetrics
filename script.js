@@ -90,7 +90,7 @@ document.getElementById("get-tracks").addEventListener("click", async () => {
     document.getElementById("quicksort-recommend-button").disabled = false;
     document.getElementById("mergesort-recommend-button").disabled = false;
     document.getElementById("unsorted-recommend-button").disabled = false;
-  }, 2000);
+  }, 1250);
 
   hideSpinner();
   
