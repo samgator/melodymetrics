@@ -1,9 +1,18 @@
 const clientId = "ea19a7d5e1244b0cae773f100eec81b9"; 
-const redirectUri = "http://localhost:5500"; 
+let redirectUri; 
 const scopes = ["user-top-read"];
 let accessToken = null;
 let cachedTopTracks = null;
 let cachedRecommendations = null;
+
+// Set redirct URI for local development or hosted site.
+if (window.location.hostname === 'localhost') {
+  redirectUri = 'http://localhost:5500'; 
+} else if (window.location.hostname === '127.0.0.1') {
+  redirectUri = 'http://127.0.0.1:5500';
+} else {
+  redirectUri = 'https://melodymetrics.netlify.app/';
+}
 
 
 // Helper for Spotify login
