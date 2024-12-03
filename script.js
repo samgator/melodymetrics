@@ -126,17 +126,9 @@ document.getElementById('max-heap-recommend-button').addEventListener('click', a
 
   const popularTracks = await getPopularTracks(topGenres, token);
 
-  const maxHeap = new MaxHeap();
-  popularTracks.forEach((track) => maxHeap.insert(track));
-
-  const recommendations = [];
-  while (maxHeap.heap.length > 0) {
-    recommendations.push(maxHeap.extractMax());
-  }
-
   hideSpinner();
 
-  displayRecommendations(recommendations);
+  displayRecommendations(popularTracks);
   
   
 });
@@ -282,63 +274,6 @@ async function getPopularTracks(genres, accessToken) {
     popularTracks.push(...data.tracks.items);
   }
   return popularTracks;
-}
-
-// Max Heap for sorting by popularity
-class MaxHeap {
-  constructor() {
-    this.heap = [];
-  }
-
-  insert(track) {
-    this.heap.push(track);
-    this.bubbleUp();
-  }
-
-  bubbleUp() {
-    let index = this.heap.length - 1;
-    while (index > 0) {
-      const parentIndex = Math.floor((index - 1) / 2);
-      if (this.heap[index].popularity <= this.heap[parentIndex].popularity) break;
-      [this.heap[index], this.heap[parentIndex]] = [this.heap[parentIndex], this.heap[index]];
-      index = parentIndex;
-    }
-  }
-
-  extractMax() {
-    const max = this.heap[0];
-    const end = this.heap.pop();
-    if (this.heap.length > 0) {
-      this.heap[0] = end;
-      this.sinkDown();
-    }
-    return max;
-  }
-
-  sinkDown() {
-    let index = 0;
-    const length = this.heap.length;
-    while (true) {
-      let leftChildIndex = 2 * index + 1;
-      let rightChildIndex = 2 * index + 2;
-      let swap = null;
-
-      if (leftChildIndex < length && this.heap[leftChildIndex].popularity > this.heap[index].popularity) {
-        swap = leftChildIndex;
-      }
-
-      if (
-        rightChildIndex < length &&
-        this.heap[rightChildIndex].popularity > (swap === null ? this.heap[index].popularity : this.heap[leftChildIndex].popularity)
-      ) {
-        swap = rightChildIndex;
-      }
-
-      if (!swap) break;
-      [this.heap[index], this.heap[swap]] = [this.heap[swap], this.heap[index]];
-      index = swap;
-    }
-  }
 }
 
 // Display Recommendations
