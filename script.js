@@ -43,8 +43,8 @@ document.getElementById("get-tracks").addEventListener("click", async () => {
   const topTracksContainer = document.getElementById('tracks-container');
   topTracksContainer.classList.remove('hidden');
 
-  document.getElementById("max-heap-recommend-button").classList.remove("hidden");
-  document.getElementById("map-recommend-button").classList.remove("hidden");
+  document.getElementById("quicksort-recommend-button").classList.remove("hidden");
+  document.getElementById("mergesort-recommend-button").classList.remove("hidden");
   document.getElementById("get-tracks").classList.add("hidden");
 
   if (cachedTopTracks) {
@@ -82,10 +82,10 @@ document.getElementById("get-tracks").addEventListener("click", async () => {
   buttonName1.textContent = 'Show Recommendations With PLACEHOLDER 1 Sort';
 });
 
-// Event Listener for recommendations
-document.getElementById('max-heap-recommend-button').addEventListener('click', async () => {
-  document.getElementById("max-heap-recommend-button").classList.add("hidden");
-  document.getElementById("map-recommend-button").classList.add("hidden");
+// Event Listener for quicksorted recommendations
+document.getElementById('quicksort-recommend-button').addEventListener('click', async () => {
+  document.getElementById("quicksort-recommend-button").classList.add("hidden");
+  document.getElementById("mergesort-recommend-button").classList.add("hidden");
   document.getElementById("get-tracks").classList.remove("hidden");
   // BACK BUTTON
   const buttonName2 = document.getElementById('get-tracks');
@@ -125,19 +125,28 @@ document.getElementById('max-heap-recommend-button').addEventListener('click', a
   }
 
   const popularTracks = await getPopularTracks(topGenres, token);
-
+  
   // Map each track with their popularities from the Spotify API for sorting
-  const trackPopularityMap = getTrackPopularities(popularTracks);
+  const trackPopularityMap = new Map();
+  for (const track of popularTracks) {
+    trackPopularityMap.set(track, track.popularity);
+  }
+
+  alert(trackPopularityMap.size);
+
+  const recommendations = sortMapQuickSort(trackPopularityMap);
+  alert('sorted tracks');
 
   hideSpinner();
 
-  displayRecommendations(popularTracks);
+  displayRecommendations(recommendations);
   
 });
 
-document.getElementById('map-recommend-button').addEventListener('click', async () => {
-  document.getElementById("max-heap-recommend-button").classList.add("hidden");
-  document.getElementById("map-recommend-button").classList.add("hidden");
+// Event Listener for merge sorted recommendations
+document.getElementById('mergesort-recommend-button').addEventListener('click', async () => {
+  document.getElementById("quicksort-recommend-button").classList.add("hidden");
+  document.getElementById("mergesort-recommend-button").classList.add("hidden");
   document.getElementById("get-tracks").classList.remove("hidden");
   // BACK BUTTON
   const buttonName2 = document.getElementById('get-tracks');
@@ -177,13 +186,20 @@ document.getElementById('map-recommend-button').addEventListener('click', async 
   }
 
   const popularTracks = await getPopularTracks(topGenres, token);
-  // Map each track with their popularities from the Spotify API for sorting
-  const trackPopularityMap = getTrackPopularities(popularTracks);
-  
+
+  const trackPopularityMap = new Map();
+  for (const track of popularTracks) {
+    trackPopularityMap.set(track, track.popularity);
+  }
+
+  alert(trackPopularityMap.size);
+
+  const recommendations = sortMapMergeSort(trackPopularityMap);
+  alert('sorted tracks');
 
   hideSpinner();
 
-  displayRecommendations(popularTracks);
+  displayRecommendations(recommendations);
 });
 
 
@@ -338,7 +354,7 @@ function displayRecommendations(tracks) {
   if (!recommendationsContainer) {
     recommendationsContainer = document.createElement('div');
     recommendationsContainer.id = 'recommendations-container';
-    recommendationsContainer.innerHTML = '<h2>Recommended Tracks (PLACEHOLDER 1 Sort)</h2><ul id="recommendations-list"></ul>';
+    recommendationsContainer.innerHTML = '<h2>Recommended Tracks</h2><ul id="recommendations-list"></ul>';
     
     
     recommendationsContainer.style.borderRadius = "8px";
@@ -406,13 +422,89 @@ function hideSpinner() {
   }
 }
 
-// Map tracks with popularities
-function getTrackPopularities(tracks) {
-  const trackPopularityMap = {};
+// Quick sort
+function partition(map, keys, low, high){
+  let pivot = map.get(keys[high]); 
+  let i = low - 1; 
 
-  for (const track of tracks) {
-    trackPopularityMap[track.name] = track.popularTracks;
+  for(let j = low; j < high; j++){
+      if(map.get(keys[j]) <= pivot){
+          i++;
+          [keys[i], keys[j]] = [keys[j], keys[i]];
+      }
   }
 
-  return trackPopularityMap;
+  [keys[i + 1], keys[high]] = [keys[high], keys[i + 1]];
+
+  return i + 1;
+}
+
+function quickSort(map, keys, low, high){
+  if(low < high){
+      let pivotIndex = partition(map, keys, low, high);
+      quickSort(map, keys, low, pivotIndex - 1);
+      quickSort(map, keys, pivotIndex + 1, high);
+  }
+}
+
+function sortMapQuickSort(map){
+  let keys = Array.from(map.keys());
+  quickSort(map, keys, 0, keys.length - 1);
+
+  return keys;
+}
+
+// Merge sort
+function merge(map, keys, left, mid, right, mapRef){
+  let n1 = mid - left + 1;
+  let n2 = right - mid;
+
+  let X = keys.slice(left, left + n1); 
+  let Y = keys.slice(mid + 1, mid + 1 + n2); 
+
+  let i = 0, j = 0, k = left;
+
+  while(i < n1 && j < n2){
+      if(map.get(X[i]) <= map.get(Y[j])){
+          keys[k] = X[i];
+          i++;
+      }
+      else{
+          keys[k] = Y[j];
+          j++;
+      }
+      k++;
+  }
+
+  while(i < n1){
+      keys[k] = X[i];
+      i++;
+      k++;
+  }
+
+  while(j < n2){
+      keys[k] = Y[j];
+      j++;
+      k++;
+  }
+}
+
+function mergeSort(map, keys, left, right, mapRef){
+  if(left < right){
+      let mid = Math.floor((left + right) / 2);
+
+      mergeSort(map, keys, left, mid, mapRef);
+      mergeSort(map, keys, mid + 1, right, mapRef);
+
+      merge(map, keys, left, mid, right, mapRef);
+  }
+}
+
+function sortMapMergeSort(map){
+  let keys = Array.from(map.keys());
+  let n = keys.length;
+
+  mergeSort(map, keys, 0, n - 1);
+
+  return keys;
 }
