@@ -52,19 +52,20 @@ document.getElementById("get-tracks").addEventListener("click", async () => {
     recommendationsContainer.classList.add('hidden');
   }
 
+  // Display recommendation buttons and disable while webpage loads
   const topTracksContainer = document.getElementById('tracks-container');
   topTracksContainer.classList.remove('hidden');
 
-  document.getElementById("quicksort-recommend-button").disabled = true;
-  document.getElementById("mergesort-recommend-button").disabled = true;
-  document.getElementById("unsorted-recommend-button").disabled = true;
-  document.getElementById("quicksort-recommend-button").classList.remove("hidden");
-  document.getElementById("mergesort-recommend-button").classList.remove("hidden");
-  document.getElementById("unsorted-recommend-button").classList.remove("hidden");
+  document.getElementById("get-tracks").textContent = "Get Tracks";
+
+  disableReccomendButtons();
+
+  showRecommendButtons();
   document.getElementById("time-range-selector").classList.remove("hidden");
 
   showSpinner();
 
+  // Call on API to get 10 top tracks within selected time range
   try {
     const response = await fetch(`https://api.spotify.com/v1/me/top/tracks?time_range=${timeRange}&limit=10`, {
       headers: {
@@ -87,9 +88,7 @@ document.getElementById("get-tracks").addEventListener("click", async () => {
 
   // Wait three seconds for tracks to finish displaying before re-enabling buttons
   setTimeout(() => {
-    document.getElementById("quicksort-recommend-button").disabled = false;
-    document.getElementById("mergesort-recommend-button").disabled = false;
-    document.getElementById("unsorted-recommend-button").disabled = false;
+    enableRecommendButtons();
   }, 1250);
 
   hideSpinner();
@@ -98,14 +97,13 @@ document.getElementById("get-tracks").addEventListener("click", async () => {
 
 // Event Listener for quicksorted recommendations
 document.getElementById('quicksort-recommend-button').addEventListener('click', async () => {
-  document.getElementById("quicksort-recommend-button").classList.add("hidden");
-  document.getElementById("mergesort-recommend-button").classList.add("hidden");
-  document.getElementById("unsorted-recommend-button").classList.add("hidden");
+
+  // Hide other buttons and containers and disable back button for loading
+  hideRecommendButtons();
   document.getElementById("time-range-selector").classList.add("hidden");
   document.getElementById("get-tracks").disabled = true;
   document.getElementById("get-tracks").classList.remove("hidden");
 
-  // BACK BUTTON
   const buttonName2 = document.getElementById('get-tracks');
   buttonName2.textContent = 'Back';
 
@@ -114,18 +112,22 @@ document.getElementById('quicksort-recommend-button').addEventListener('click', 
     topTracksContainer.classList.add('hidden');
   }
 
+  // Get top tracks for genre retreival
   const token = accessToken;
   const tracks = await getTopTracks(token);
+  timeRange = document.getElementById("time-range").value;
 
   showSpinner();
 
   if (!tracks || tracks.length === 0) {
     alert("No top tracks available.");
+    displayRecommendations(tracks);
     hideSpinner();
     document.getElementById("get-tracks").disabled = false;
     return;
   }
 
+  // Retrieve genres from the user's top tracks
   const topGenres = await getTopGenres(tracks, token);
 
   if (topGenres.length === 0) {
@@ -135,11 +137,13 @@ document.getElementById('quicksort-recommend-button').addEventListener('click', 
     return;
   }
 
+  // Display container for displaying recommendations
   const recommendationsContainer = document.getElementById('recommendations-container');
   if (recommendationsContainer) {
     recommendationsContainer.classList.remove('hidden');
   }
 
+  // Get popular tracks from the user's top genres
   const popularTracks = await getPopularTracks(topGenres, token);
   
   // Map each track with their popularities from the Spotify API for sorting
@@ -148,7 +152,7 @@ document.getElementById('quicksort-recommend-button').addEventListener('click', 
     trackPopularityMap.set(track, track.popularity);
   }
 
-
+  // Quick sort the tracks to recommend based on popularity
   const recommendations = sortMapQuickSort(trackPopularityMap);
 
   hideSpinner();
@@ -160,14 +164,13 @@ document.getElementById('quicksort-recommend-button').addEventListener('click', 
 
 // Event listener for unsorted recommend button
 document.getElementById('unsorted-recommend-button').addEventListener('click', async () => {
-  document.getElementById("quicksort-recommend-button").classList.add("hidden");
-  document.getElementById("mergesort-recommend-button").classList.add("hidden");
-  document.getElementById("unsorted-recommend-button").classList.add("hidden");
+
+  // Hide other buttons and containers and disable back button for loading
+  hideRecommendButtons();
   document.getElementById("time-range-selector").classList.add("hidden");
   document.getElementById("get-tracks").disabled = true;
   document.getElementById("get-tracks").classList.remove("hidden");
 
-  // BACK BUTTON
   const buttonName2 = document.getElementById('get-tracks');
   buttonName2.textContent = 'Back';
 
@@ -176,18 +179,28 @@ document.getElementById('unsorted-recommend-button').addEventListener('click', a
     topTracksContainer.classList.add('hidden');
   }
 
+  // Display container for displaying recommendations
+  const recommendationsContainer = document.getElementById('recommendations-container');
+  if (recommendationsContainer) {
+    recommendationsContainer.classList.remove('hidden');
+  }
+
+  // Get top tracks for genre retreival
   const token = accessToken;
   const tracks = await getTopTracks(token);
+  timeRange = document.getElementById("time-range").value;
 
   showSpinner();
 
   if (!tracks || tracks.length === 0) {
     alert("No top tracks available.");
+    displayRecommendations(tracks);
     hideSpinner();
     document.getElementById("get-tracks").disabled = false;
     return;
   }
 
+  // Retrieve genres from the user's top tracks
   const topGenres = await getTopGenres(tracks, token);
 
   if (topGenres.length === 0) {
@@ -197,15 +210,12 @@ document.getElementById('unsorted-recommend-button').addEventListener('click', a
     return;
   }
 
-  const recommendationsContainer = document.getElementById('recommendations-container');
-  if (recommendationsContainer) {
-    recommendationsContainer.classList.remove('hidden');
-  }
-
+  // Get popular tracks from the user's top genres
   const popularTracks = await getPopularTracks(topGenres, token);
 
   hideSpinner();
 
+  // Display unsorted recommendations
   displayRecommendations(popularTracks);
   document.getElementById("get-tracks").disabled = false;
   
@@ -213,13 +223,14 @@ document.getElementById('unsorted-recommend-button').addEventListener('click', a
 
 // Event Listener for merge sorted recommendations
 document.getElementById('mergesort-recommend-button').addEventListener('click', async () => {
-  document.getElementById("quicksort-recommend-button").classList.add("hidden");
-  document.getElementById("mergesort-recommend-button").classList.add("hidden");
-  document.getElementById("unsorted-recommend-button").classList.add("hidden");
+
+  // Hide other buttons and containers and disable back button for loading
+  hideRecommendButtons();
+
   document.getElementById("time-range-selector").classList.add("hidden");
   document.getElementById("get-tracks").disabled = true;
   document.getElementById("get-tracks").classList.remove("hidden");
-  // BACK BUTTON
+  
   const buttonName2 = document.getElementById('get-tracks');
   buttonName2.textContent = 'Back';
 
@@ -228,18 +239,28 @@ document.getElementById('mergesort-recommend-button').addEventListener('click', 
     topTracksContainer.classList.add('hidden');
   }
 
+  // Display container for displaying recommendations
+  const recommendationsContainer = document.getElementById('recommendations-container');
+  if (recommendationsContainer) {
+    recommendationsContainer.classList.remove('hidden');
+  }
+
+  // Get top tracks for genre retreival
   const token = accessToken;
   const tracks = await getTopTracks(token);
+  timeRange = document.getElementById("time-range").value;
 
   showSpinner();
 
   if (!tracks || tracks.length === 0) {
     alert("No top tracks available.");
+    displayRecommendations(tracks);
     hideSpinner();
     document.getElementById("get-tracks").disabled = false;
     return;
   }
 
+  // Retrieve genres from the user's top tracks
   const topGenres = await getTopGenres(tracks, token);
 
   if (topGenres.length === 0) {
@@ -249,18 +270,16 @@ document.getElementById('mergesort-recommend-button').addEventListener('click', 
     return;
   }
 
-  const recommendationsContainer = document.getElementById('recommendations-container');
-  if (recommendationsContainer) {
-    recommendationsContainer.classList.remove('hidden');
-  }
-
+  // Get popular tracks from the user's top genres
   const popularTracks = await getPopularTracks(topGenres, token);
 
+  // Map each track with their popularities from the Spotify API for sorting
   const trackPopularityMap = new Map();
   for (const track of popularTracks) {
     trackPopularityMap.set(track, track.popularity);
   }
 
+  // Merge sort the tracks to recommend based on popularity
   const recommendations = sortMapMergeSort(trackPopularityMap);
 
   hideSpinner();
@@ -269,11 +288,10 @@ document.getElementById('mergesort-recommend-button').addEventListener('click', 
   document.getElementById("get-tracks").disabled = false;
 });
 
+// Easter egg
 document.getElementById("invisibleButton").addEventListener("click", function () {
   window.open("https://www.youtube.com/watch?v=dQw4w9WgXcQ", "_blank");
 });
-
-
 
 // Function to display the user's top tracks
 async function displayTracks(tracks) {
@@ -288,6 +306,7 @@ async function displayTracks(tracks) {
 
   tracksList.innerHTML = "";
 
+  // Display when user has no top tracks
   if (tracks.length === 0) {
     const listItem = document.createElement("li");
     listItem.innerHTML = `<strong> No tracks found for this time range.</strong>`;
@@ -296,6 +315,7 @@ async function displayTracks(tracks) {
     return;
   }
 
+  // Iteratively display the user's top tracks and fetch artist name from API
   for (const [index, track] of tracks.entries()) {
     const listItem = document.createElement("li");
 
@@ -342,7 +362,7 @@ async function displayTracks(tracks) {
   notesRight.style.display = "block";
 }
 
-
+// Gets top tracks from API for usage in recommendations
 async function getTopTracks(accessToken) {
   try {
     const response = await fetch(`https://api.spotify.com/v1/me/top/tracks?time_range=${timeRange}`, {
@@ -363,7 +383,7 @@ async function getTopTracks(accessToken) {
   }
 }
 
-// Function to fetch genres for a list of artist IDs
+// Function to fetch genres from API from a list of artist IDs
 async function fetchGenres(artistIds, accessToken) {
   const genres = [];
   try {
@@ -390,7 +410,7 @@ async function fetchGenres(artistIds, accessToken) {
   return genres;
 }
 
-// Function to get the 5 most common genres
+// Function to get the 5 top genres from the artists of each track
 async function getTopGenres(tracks, accessToken) {
   const artistIds = tracks.map((track) => track.artists[0].id);
   const genres = await fetchGenres(artistIds, accessToken);
@@ -407,7 +427,7 @@ async function getTopGenres(tracks, accessToken) {
   return sortedGenres.map((genre) => genre[0]);
 }
 
-// Get popular tracks in given genres
+// Get popular tracks form API in the user's most listened to genres
 async function getPopularTracks(genres, accessToken) {
   const popularTracks = [];
   for (const genre of genres) {
@@ -429,11 +449,11 @@ async function getPopularTracks(genres, accessToken) {
 function displayRecommendations(tracks) {
   let recommendationsContainer = document.getElementById('recommendations-container');
 
+  // Style the recommendations container
   if (!recommendationsContainer) {
     recommendationsContainer = document.createElement('div');
     recommendationsContainer.id = 'recommendations-container';
     recommendationsContainer.innerHTML = '<h2>Recommended Tracks</h2><ul id="recommendations-list"></ul>';
-    
     
     recommendationsContainer.style.borderRadius = "8px";
     recommendationsContainer.style.padding = "0px";
@@ -454,12 +474,13 @@ function displayRecommendations(tracks) {
   if (tracks.length === 0) {
     const listItem = document.createElement('li');
     listItem.textContent = "No recommendations available.";
-    listItem.style.color = "#333";
+    listItem.style.color = "#fff";
     listItem.style.textAlign = "center";
     list.appendChild(listItem);
     return;
   }
 
+  // Use a set to only recommend unique tracks
   const uniqueTracks = new Set();
     tracks.forEach((track, index) => {
         if (!uniqueTracks.has(track.id)) {
@@ -487,6 +508,7 @@ function displayRecommendations(tracks) {
   list.style.margin = "0";
 }
 
+// Functions for hiding and showing loading spinner
 function showSpinner() {
   const spinner = document.getElementById('loading-spinner');
   if (spinner) {
@@ -501,6 +523,30 @@ function hideSpinner() {
   }
 }
 
+// Enable and disable recommendation buttons
+function enableRecommendButtons() {
+  document.getElementById("quicksort-recommend-button").disabled = false;
+  document.getElementById("mergesort-recommend-button").disabled = false;
+  document.getElementById("unsorted-recommend-button").disabled = false;
+}
+
+function disableReccomendButtons() {
+  document.getElementById("quicksort-recommend-button").disabled = true;
+  document.getElementById("mergesort-recommend-button").disabled = true;
+  document.getElementById("unsorted-recommend-button").disabled = true;
+}
+
+function showRecommendButtons() {
+  document.getElementById("quicksort-recommend-button").classList.remove("hidden");
+  document.getElementById("mergesort-recommend-button").classList.remove("hidden");
+  document.getElementById("unsorted-recommend-button").classList.remove("hidden");
+}
+
+function hideRecommendButtons() {
+  document.getElementById("quicksort-recommend-button").classList.add("hidden");
+  document.getElementById("mergesort-recommend-button").classList.add("hidden");
+  document.getElementById("unsorted-recommend-button").classList.add("hidden");
+}
 // Quick sort
 function partition(map, keys, low, high){
   const pivot = map.get(keys[high]);
