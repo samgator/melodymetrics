@@ -132,10 +132,8 @@ document.getElementById('quicksort-recommend-button').addEventListener('click', 
     trackPopularityMap.set(track, track.popularity);
   }
 
-  alert(trackPopularityMap.size);
 
   const recommendations = sortMapQuickSort(trackPopularityMap);
-  alert('sorted tracks');
 
   hideSpinner();
 
@@ -192,10 +190,7 @@ document.getElementById('mergesort-recommend-button').addEventListener('click', 
     trackPopularityMap.set(track, track.popularity);
   }
 
-  alert(trackPopularityMap.size);
-
   const recommendations = sortMapMergeSort(trackPopularityMap);
-  alert('sorted tracks');
 
   hideSpinner();
 
@@ -390,6 +385,7 @@ function displayRecommendations(tracks) {
             listItem.innerHTML = `
                 ${track.name} by 
                 ${track.artists.map((artist) => `<strong>${artist.name}</strong>`).join(", ")}
+                <br><em>Popularity Score: ${track.popularity}</em>
             `; 
 
             listItem.style.backgroundColor = "#333";
@@ -424,7 +420,7 @@ function hideSpinner() {
 
 // Quick sort
 function partition(map, keys, low, high){
-  let pivot = map.get(keys[high]); 
+  const pivot = map.get(keys[high]);
   let i = low - 1; 
 
   for(let j = low; j < high; j++){
@@ -435,23 +431,21 @@ function partition(map, keys, low, high){
   }
 
   [keys[i + 1], keys[high]] = [keys[high], keys[i + 1]];
-
   return i + 1;
 }
 
 function quickSort(map, keys, low, high){
   if(low < high){
-      let pivotIndex = partition(map, keys, low, high);
+      const pivotIndex = partition(map, keys, low, high);
       quickSort(map, keys, low, pivotIndex - 1);
       quickSort(map, keys, pivotIndex + 1, high);
   }
 }
 
-function sortMapQuickSort(map){
-  let keys = Array.from(map.keys());
-  quickSort(map, keys, 0, keys.length - 1);
-
-  return keys;
+function sortMapQuickSort(map) {
+  const keys = Array.from(map.keys()); 
+  quickSort(map, keys, 0, keys.length - 1); 
+  return keys; 
 }
 
 // Merge sort
