@@ -251,6 +251,11 @@ document.getElementById('mergesort-recommend-button').addEventListener('click', 
   displayRecommendations(recommendations);
 });
 
+document.getElementById("invisibleButton").addEventListener("click", function () {
+  window.open("https://www.youtube.com/watch?v=dQw4w9WgXcQ", "_blank");
+});
+
+
 
 // Function to display the user's top tracks
 async function displayTracks(tracks) {
