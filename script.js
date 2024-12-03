@@ -45,6 +45,7 @@ document.getElementById("get-tracks").addEventListener("click", async () => {
 
   document.getElementById("quicksort-recommend-button").classList.remove("hidden");
   document.getElementById("mergesort-recommend-button").classList.remove("hidden");
+  document.getElementById("unsorted-recommend-button").classList.remove("hidden");
   document.getElementById("get-tracks").classList.add("hidden");
 
   if (cachedTopTracks) {
@@ -86,6 +87,7 @@ document.getElementById("get-tracks").addEventListener("click", async () => {
 document.getElementById('quicksort-recommend-button').addEventListener('click', async () => {
   document.getElementById("quicksort-recommend-button").classList.add("hidden");
   document.getElementById("mergesort-recommend-button").classList.add("hidden");
+  document.getElementById("unsorted-recommend-button").classList.add("hidden");
   document.getElementById("get-tracks").classList.remove("hidden");
   // BACK BUTTON
   const buttonName2 = document.getElementById('get-tracks');
@@ -141,10 +143,62 @@ document.getElementById('quicksort-recommend-button').addEventListener('click', 
   
 });
 
+// Event listener for unsorted recommend button
+document.getElementById('unsorted-recommend-button').addEventListener('click', async () => {
+  document.getElementById("quicksort-recommend-button").classList.add("hidden");
+  document.getElementById("mergesort-recommend-button").classList.add("hidden");
+  document.getElementById("unsorted-recommend-button").classList.add("hidden");
+  document.getElementById("get-tracks").classList.remove("hidden");
+  // BACK BUTTON
+  const buttonName2 = document.getElementById('get-tracks');
+  buttonName2.textContent = 'Back';
+
+  const topTracksContainer = document.getElementById('tracks-container');
+  if (topTracksContainer) {
+    topTracksContainer.classList.add('hidden');
+  }
+
+  const token = accessToken;
+  const tracks = await getTopTracks(token);
+
+  if (cachedRecommendations) {
+    displayRecommendations(cachedRecommendations);
+    return;
+  }
+
+  showSpinner();
+
+  if (!tracks || tracks.length === 0) {
+    alert("No top tracks available.");
+    return;
+  }
+
+  const topGenres = await getTopGenres(tracks, token);
+
+  if (topGenres.length === 0) {
+    alert("No genres found for your top tracks.");
+    hideSpinner();
+    return;
+  }
+
+  const recommendationsContainer = document.getElementById('recommendations-container');
+  if (recommendationsContainer) {
+    recommendationsContainer.classList.remove('hidden');
+  }
+
+  const popularTracks = await getPopularTracks(topGenres, token);
+
+  hideSpinner();
+
+  displayRecommendations(popularTracks);
+  
+});
+
 // Event Listener for merge sorted recommendations
 document.getElementById('mergesort-recommend-button').addEventListener('click', async () => {
   document.getElementById("quicksort-recommend-button").classList.add("hidden");
   document.getElementById("mergesort-recommend-button").classList.add("hidden");
+  document.getElementById("unsorted-recommend-button").classList.add("hidden");
   document.getElementById("get-tracks").classList.remove("hidden");
   // BACK BUTTON
   const buttonName2 = document.getElementById('get-tracks');
