@@ -211,3 +211,12 @@ li:nth-child(3) {
   background: #282828; 
   border-radius: 5px;
 }
+
+#time-range-selector {
+  margin-bottom: 1rem;
+}
+
+#time-range {
+  padding: 0.5rem;
+  font-size: 1rem;
+}

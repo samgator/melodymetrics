@@ -2,8 +2,7 @@ const clientId = "ea19a7d5e1244b0cae773f100eec81b9";
 let redirectUri; 
 const scopes = ["user-top-read"];
 let accessToken = null;
-let cachedTopTracks = null;
-let cachedRecommendations = null;
+let timeRange = "long_term";
 
 // Set redirct URI for local development or hosted site.
 if (window.location.hostname === 'localhost') {
@@ -32,6 +31,7 @@ window.onload = () => {
   if (params.has("access_token")) {
     accessToken = params.get("access_token");
     document.getElementById("get-tracks").classList.remove("hidden");
+    document.getElementById("time-range-selector").classList.remove("hidden");
     document.getElementById("login-button").classList.add("hidden");
 };
 }
@@ -43,6 +43,8 @@ document.getElementById("get-tracks").addEventListener("click", async () => {
     alert("You need to log in first.");
     return;
   }
+
+  timeRange = document.getElementById("time-range").value;
 
   const recommendationsContainer = document.getElementById('recommendations-container');
 
@@ -59,22 +61,12 @@ document.getElementById("get-tracks").addEventListener("click", async () => {
   document.getElementById("quicksort-recommend-button").classList.remove("hidden");
   document.getElementById("mergesort-recommend-button").classList.remove("hidden");
   document.getElementById("unsorted-recommend-button").classList.remove("hidden");
-  
-  document.getElementById("get-tracks").classList.add("hidden");
-
-  if (cachedTopTracks) {
-    displayTracks(cachedTopTracks);
-    document.getElementById("quicksort-recommend-button").disabled = false;
-    document.getElementById("mergesort-recommend-button").disabled = false;
-    document.getElementById("unsorted-recommend-button").disabled = false;
-    return;
-  }
+  document.getElementById("time-range-selector").classList.remove("hidden");
 
   showSpinner();
 
   try {
-    
-    const response = await fetch("https://api.spotify.com/v1/me/top/tracks?limit=50", {
+    const response = await fetch(`https://api.spotify.com/v1/me/top/tracks?time_range=${timeRange}&limit=10`, {
       headers: {
         Authorization: `Bearer ${accessToken}`,
       },
@@ -86,15 +78,12 @@ document.getElementById("get-tracks").addEventListener("click", async () => {
 
     const data = await response.json();
     displayTracks(data.items);
-
-    cachedTopTracks = data.items;
     
   } catch (error) {
     console.error(error);
     alert("Error fetching top tracks");
   }
 
-  hideSpinner();
 
   // Wait three seconds for tracks to finish displaying before re-enabling buttons
   setTimeout(() => {
@@ -102,6 +91,8 @@ document.getElementById("get-tracks").addEventListener("click", async () => {
     document.getElementById("mergesort-recommend-button").disabled = false;
     document.getElementById("unsorted-recommend-button").disabled = false;
   }, 2000);
+
+  hideSpinner();
   
 });
 
@@ -110,6 +101,7 @@ document.getElementById('quicksort-recommend-button').addEventListener('click', 
   document.getElementById("quicksort-recommend-button").classList.add("hidden");
   document.getElementById("mergesort-recommend-button").classList.add("hidden");
   document.getElementById("unsorted-recommend-button").classList.add("hidden");
+  document.getElementById("time-range-selector").classList.add("hidden");
   document.getElementById("get-tracks").disabled = true;
   document.getElementById("get-tracks").classList.remove("hidden");
 
@@ -124,12 +116,6 @@ document.getElementById('quicksort-recommend-button').addEventListener('click', 
 
   const token = accessToken;
   const tracks = await getTopTracks(token);
-
-  if (cachedRecommendations) {
-    displayRecommendations(cachedRecommendations);
-    document.getElementById("get-tracks").disabled = false;
-    return;
-  }
 
   showSpinner();
 
@@ -175,6 +161,7 @@ document.getElementById('unsorted-recommend-button').addEventListener('click', a
   document.getElementById("quicksort-recommend-button").classList.add("hidden");
   document.getElementById("mergesort-recommend-button").classList.add("hidden");
   document.getElementById("unsorted-recommend-button").classList.add("hidden");
+  document.getElementById("time-range-selector").classList.add("hidden");
   document.getElementById("get-tracks").disabled = true;
   document.getElementById("get-tracks").classList.remove("hidden");
 
@@ -189,12 +176,6 @@ document.getElementById('unsorted-recommend-button').addEventListener('click', a
 
   const token = accessToken;
   const tracks = await getTopTracks(token);
-
-  if (cachedRecommendations) {
-    displayRecommendations(cachedRecommendations);
-    document.getElementById("get-tracks").disabled = false;
-    return;
-  }
 
   showSpinner();
 
@@ -232,6 +213,7 @@ document.getElementById('mergesort-recommend-button').addEventListener('click', 
   document.getElementById("quicksort-recommend-button").classList.add("hidden");
   document.getElementById("mergesort-recommend-button").classList.add("hidden");
   document.getElementById("unsorted-recommend-button").classList.add("hidden");
+  document.getElementById("time-range-selector").classList.add("hidden");
   document.getElementById("get-tracks").disabled = true;
   document.getElementById("get-tracks").classList.remove("hidden");
   // BACK BUTTON
@@ -245,12 +227,6 @@ document.getElementById('mergesort-recommend-button').addEventListener('click', 
 
   const token = accessToken;
   const tracks = await getTopTracks(token);
-
-  if (cachedRecommendations) {
-    displayRecommendations(cachedRecommendations);
-    document.getElementById("get-tracks").disabled = false;
-    return;
-  }
 
   showSpinner();
 
@@ -308,6 +284,14 @@ async function displayTracks(tracks) {
 
   tracksList.innerHTML = "";
 
+  if (tracks.length === 0) {
+    const listItem = document.createElement("li");
+    listItem.innerHTML = `<strong> No tracks found for this time range.</strong>`;
+    tracksList.appendChild(listItem);
+    tracksContainer.classList.remove("hidden");
+    return;
+  }
+
   for (const [index, track] of tracks.entries()) {
     const listItem = document.createElement("li");
 
@@ -357,7 +341,7 @@ async function displayTracks(tracks) {
 
 async function getTopTracks(accessToken) {
   try {
-    const response = await fetch('https://api.spotify.com/v1/me/top/tracks', {
+    const response = await fetch(`https://api.spotify.com/v1/me/top/tracks?time_range=${timeRange}`, {
       headers: {
         Authorization: `Bearer ${accessToken}`,
       },
