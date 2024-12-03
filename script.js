@@ -121,6 +121,8 @@ document.getElementById('quicksort-recommend-button').addEventListener('click', 
 
   if (!tracks || tracks.length === 0) {
     alert("No top tracks available.");
+    hideSpinner();
+    document.getElementById("get-tracks").disabled = false;
     return;
   }
 
@@ -181,6 +183,7 @@ document.getElementById('unsorted-recommend-button').addEventListener('click', a
 
   if (!tracks || tracks.length === 0) {
     alert("No top tracks available.");
+    hideSpinner();
     document.getElementById("get-tracks").disabled = false;
     return;
   }
@@ -232,6 +235,7 @@ document.getElementById('mergesort-recommend-button').addEventListener('click', 
 
   if (!tracks || tracks.length === 0) {
     alert("No top tracks available.");
+    hideSpinner();
     document.getElementById("get-tracks").disabled = false;
     return;
   }
@@ -240,8 +244,8 @@ document.getElementById('mergesort-recommend-button').addEventListener('click', 
 
   if (topGenres.length === 0) {
     alert("No genres found for your top tracks.");
-    document.getElementById("get-tracks").disabled = false;
     hideSpinner();
+    document.getElementById("get-tracks").disabled = false;
     return;
   }
 
