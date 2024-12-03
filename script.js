@@ -1,4 +1,4 @@
-const clientId = "70e55b3d35cf454f9fce7c88ee08a170"; 
+const clientId = "ea19a7d5e1244b0cae773f100eec81b9"; 
 const redirectUri = "http://localhost:5500"; 
 const scopes = ["user-top-read"];
 let accessToken = null;
