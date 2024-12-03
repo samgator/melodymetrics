@@ -1,17 +1,9 @@
 const clientId = "70e55b3d35cf454f9fce7c88ee08a170"; 
-let redirectUri; 
+const redirectUri = "http://localhost:5500"; 
 const scopes = ["user-top-read"];
 let accessToken = null;
 let cachedTopTracks = null;
-
-// Set redirct URI for local development or hosted website
-if (window.location.hostname === 'localhost') {
-  redirectUri = 'http://localhost:5500'; 
-} else if (window.location.hostname === '127.0.0.1') {
-  redirectUri = 'http://127.0.0.1:5500';
-} else {
-  redirectUri = 'https://melodymetrics.netlify.app/';
-}
+let cachedRecommendations = null;
 
 
 // Helper for Spotify login
@@ -85,24 +77,22 @@ document.getElementById("get-tracks").addEventListener("click", async () => {
   }
   hideSpinner();
 
+  //change back button back 
+  const buttonName1 = document.getElementById('get-tracks');
+  buttonName1.textContent = 'Show Recommendations With PLACEHOLDER 1 Sort';
 });
 
 // Event Listener for recommendations
 document.getElementById('max-heap-recommend-button').addEventListener('click', async () => {
-  // change back button back
-  const button = document.getElementById('get-tracks');
-  button.textContent = 'Back';
-  document.getElementById("max-heap-recommend-button").classList.add("hidden");
   document.getElementById("map-recommend-button").classList.add("hidden");
-  document.getElementById("get-tracks").classList.remove("hidden");
-
-  const topTracksContainer = document.getElementById('tracks-container');
-  if (topTracksContainer) {
-    topTracksContainer.classList.add('hidden');
-  }
 
   const token = accessToken;
   const tracks = await getTopTracks(token);
+
+  if (cachedRecommendations) {
+    displayRecommendations(cachedRecommendations);
+    return;
+  }
 
   showSpinner();
 
@@ -119,10 +109,19 @@ document.getElementById('max-heap-recommend-button').addEventListener('click', a
     return;
   }
 
+  const topTracksContainer = document.getElementById('tracks-container');
+  if (topTracksContainer) {
+    topTracksContainer.classList.add('hidden');
+  }
+
   const recommendationsContainer = document.getElementById('recommendations-container');
   if (recommendationsContainer) {
     recommendationsContainer.classList.remove('hidden');
   }
+
+  document.getElementById("max-heap-recommend-button").classList.add("hidden");
+  document.getElementById("get-tracks").classList.remove("hidden");
+
 
   const popularTracks = await getPopularTracks(topGenres, token);
 
@@ -130,12 +129,16 @@ document.getElementById('max-heap-recommend-button').addEventListener('click', a
 
   displayRecommendations(popularTracks);
   
-  
+  hideSpinner();
+  // BACK BUTTON
+  const buttonName2 = document.getElementById('get-tracks');
+  buttonName2.textContent = 'Back';
 });
 
 
 // Function to display the user's top tracks
 async function displayTracks(tracks) {
+  showSpinner();
   const tracksContainer = document.getElementById("tracks-container");
   const tracksList = document.getElementById("tracks-list");
   const logo = document.getElementById("logo");
@@ -191,6 +194,7 @@ async function displayTracks(tracks) {
   const notesRight = document.getElementById("notes-right");
   notesLeft.style.display = "block";
   notesRight.style.display = "block";
+  hideSpinner();
 }
 
 
@@ -283,7 +287,7 @@ function displayRecommendations(tracks) {
   if (!recommendationsContainer) {
     recommendationsContainer = document.createElement('div');
     recommendationsContainer.id = 'recommendations-container';
-    recommendationsContainer.innerHTML = '<h2>Recommended Tracks (Max Heap)</h2><ul id="recommendations-list"></ul>';
+    recommendationsContainer.innerHTML = '<h2>Recommended Tracks (PLACEHOLDER 1 Sort)</h2><ul id="recommendations-list"></ul>';
     
     
     recommendationsContainer.style.borderRadius = "8px";
