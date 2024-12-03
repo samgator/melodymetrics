@@ -84,7 +84,17 @@ document.getElementById("get-tracks").addEventListener("click", async () => {
 
 // Event Listener for recommendations
 document.getElementById('max-heap-recommend-button').addEventListener('click', async () => {
+  document.getElementById("max-heap-recommend-button").classList.add("hidden");
   document.getElementById("map-recommend-button").classList.add("hidden");
+  document.getElementById("get-tracks").classList.remove("hidden");
+  // BACK BUTTON
+  const buttonName2 = document.getElementById('get-tracks');
+  buttonName2.textContent = 'Back';
+
+  const topTracksContainer = document.getElementById('tracks-container');
+  if (topTracksContainer) {
+    topTracksContainer.classList.add('hidden');
+  }
 
   const token = accessToken;
   const tracks = await getTopTracks(token);
@@ -109,19 +119,10 @@ document.getElementById('max-heap-recommend-button').addEventListener('click', a
     return;
   }
 
-  const topTracksContainer = document.getElementById('tracks-container');
-  if (topTracksContainer) {
-    topTracksContainer.classList.add('hidden');
-  }
-
   const recommendationsContainer = document.getElementById('recommendations-container');
   if (recommendationsContainer) {
     recommendationsContainer.classList.remove('hidden');
   }
-
-  document.getElementById("max-heap-recommend-button").classList.add("hidden");
-  document.getElementById("get-tracks").classList.remove("hidden");
-
 
   const popularTracks = await getPopularTracks(topGenres, token);
 
@@ -129,10 +130,54 @@ document.getElementById('max-heap-recommend-button').addEventListener('click', a
 
   displayRecommendations(popularTracks);
   
-  hideSpinner();
+});
+
+document.getElementById('map-recommend-button').addEventListener('click', async () => {
+  document.getElementById("max-heap-recommend-button").classList.add("hidden");
+  document.getElementById("map-recommend-button").classList.add("hidden");
+  document.getElementById("get-tracks").classList.remove("hidden");
   // BACK BUTTON
   const buttonName2 = document.getElementById('get-tracks');
   buttonName2.textContent = 'Back';
+
+  const topTracksContainer = document.getElementById('tracks-container');
+  if (topTracksContainer) {
+    topTracksContainer.classList.add('hidden');
+  }
+
+  const token = accessToken;
+  const tracks = await getTopTracks(token);
+
+  if (cachedRecommendations) {
+    displayRecommendations(cachedRecommendations);
+    return;
+  }
+
+  showSpinner();
+
+  if (!tracks || tracks.length === 0) {
+    alert("No top tracks available.");
+    return;
+  }
+
+  const topGenres = await getTopGenres(tracks, token);
+
+  if (topGenres.length === 0) {
+    alert("No genres found for your top tracks.");
+    hideSpinner();
+    return;
+  }
+
+  const recommendationsContainer = document.getElementById('recommendations-container');
+  if (recommendationsContainer) {
+    recommendationsContainer.classList.remove('hidden');
+  }
+
+  const popularTracks = await getPopularTracks(topGenres, token);
+
+  hideSpinner();
+
+  displayRecommendations(popularTracks);
 });
 
 
